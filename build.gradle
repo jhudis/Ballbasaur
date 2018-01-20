@@ -1,0 +1,116 @@
+import jaci.openrio.gradle.GradleRIOPlugin
+import jaci.openrio.gradle.frc.FRCJavaArtifact
+import jaci.openrio.gradle.frc.RoboRIO
+
+plugins {
+    id 'org.hidetake.ssh' version "2.9.0"
+    id 'java'
+    id 'eclipse'
+    id 'idea'
+    id 'jaci.openrio.gradle.GradleRIO' version "2018.01.14"
+}
+
+group 'org.usfirst.frc.team449.Ballbasaur'
+version '1.0'
+
+def TEAM = 449
+def ROBOT_CLASS = "org.usfirst.frc.team449.robot.Robot"
+
+repositories {
+    mavenCentral()
+    maven {
+        name = "GradleRio"
+        url = "http://dev.imjac.in/maven"
+    }
+
+    maven { url "https://plugins.gradle.org/m2/" }
+    maven { url 'https://jitpack.io' }
+}
+
+wpi {
+    wpilibVersion = "2018.1.1"      // The WPILib version to use. For this version of GradleRIO, must be a 2017 version.
+    ntcoreVersion = "4.0.0"         // The NetworkTables Core version to use.
+    opencvVersion = "3.2.0"         // The OpenCV version to use.
+    cscoreVersion = "1.1.0"         // The CSCore version to use.
+    wpiutilVersion = "3.0.0"
+    ctreVersion = "5.2.1.1"        // The CTRE Toolsuite (Talon SRX) version to use.
+    navxVersion = "3.0.342"         // The NavX-MXP library version to use.
+    smartDashboardVersion = '3.0.0'
+    shuffleboardVersion = '1.0.0'
+}
+
+dependencies {
+    compile group : 'com.github.blair-robot-project', name: '449-central-repo', version:'30f884493d'
+    compile wpilib()
+    compile ctre()
+    compile navx()
+}
+
+/* ssh stuff */
+remotes {
+    rio {
+        host = 'roboRIO-449-frc.local'
+        user = 'lvuser'
+        knownHosts = allowAnyHosts
+    }
+}
+
+task('copyResources') {
+    doLast {
+        ssh.run {
+            session(remotes.rio) {
+                execute 'mkdir ~/449_resources', ignoreError: true
+                execute 'mkdir ~/logs', ignoreError: true
+                put from: fileTree('src/main/resources'), into: './449_resources/'
+                execute ". /etc/profile.d/natinst-path.sh; /usr/local/frc/bin/frcKillRobot.sh -t -r", ignoreError: true
+            }
+        }
+    }
+}
+
+deploy {
+    targets {
+        target("roborio", RoboRIO) {
+            team = TEAM
+        }
+    }
+    artifacts {
+        artifact('frcJava', FRCJavaArtifact) {
+            targets << "roborio"
+        }
+    }
+}
+
+jar {
+    from configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    manifest GradleRIOPlugin.javaManifest(ROBOT_CLASS)
+}
+
+task genJavadoc(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+task deleteDocs(type: Delete){
+    delete 'docs'
+    followSymlinks = false
+}
+
+task copyDocs(type: Copy, dependsOn: [genJavadoc, deleteDocs]){
+    from 'build/docs/javadoc'
+    into 'docs'
+}
+
+artifacts {
+    archives genJavadoc
+}
+
+compileJava {
+    options.compilerArgs << '-parameters'
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '4.4'
+}
