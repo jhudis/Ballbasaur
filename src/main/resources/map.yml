@@ -17,6 +17,13 @@ logger:
                 reverseSensor: false
             inFastVel: .8
             outFastVel: .8
+        - org.usfirst.frc.team449.robot.subsystem.interfaces.solenoid.SolenoidSimple:
+            '@id': intakePivot
+            piston:
+              org.usfirst.frc.team449.robot.jacksonWrappers.MappedDoubleSolenoid:
+                '@id': piston
+                forward: 2
+                reverse: 3
         - org.usfirst.frc.team449.robot.drive.unidirectional.DriveUnidirectionalWithGyroShiftable:
             '@id': drive
             #Wheelbase: 1.7083333333333333
@@ -209,7 +216,15 @@ logger:
                   upshiftFwdThresh: 0.52
         - org.usfirst.frc.team449.robot.subsystem.interfaces.intake.commands.SetIntakeMode:
               '@id': intakeOff
+              subsystem:
+                org.usfirst.frc.team449.robot.subsystem.interfaces.intake.IntakeSimple:
+                   intake
               mode: OFF
+        - org.usfirst.frc.team449.robot.subsystem.interfaces.solenoid.commands.SolenoidOff:
+              '@id': solenoidOff
+              subsystem:
+                org.usfirst.frc.team449.robot.subsystem.interfaces.solenoid.SolenoidSimple:
+                   intakePivot
 defaultCommands:
     - subsystem:
         org.usfirst.frc.team449.robot.drive.unidirectional.DriveUnidirectionalWithGyroShiftable:
@@ -223,6 +238,12 @@ defaultCommands:
       command:
         org.usfirst.frc.team449.robot.subsystem.interfaces.intake.commands.SetIntakeMode:
             intakeOff
+    - subsystem:
+        org.usfirst.frc.team449.robot.subsystem.interfaces.solenoid.SolenoidSimple:
+            intakePivot
+      command:
+        org.usfirst.frc.team449.robot.subsystem.interfaces.solenoid.commands.SolenoidOff:
+            solenoidOff
 startupCommand:
     org.usfirst.frc.team449.robot.commands.general.ParallelCommandGroup:
         '@id': startupCommand
@@ -280,30 +301,43 @@ buttons:
                         drive
         action: WHEN_PRESSED
     -   button:
-            org.usfirst.frc.team449.oi.buttons.SimpleButton
-            '@id': intakeInButton
-            joystick:
-                 org.usfirst.frc.team449.robot.jacksonWrappers.MappedJoystick:
-                     driverGamepad
-            buttonNumber: 3
+            org.usfirst.frc.team449.oi.buttons.SimpleButton:
+                '@id': intakeInButton
+                joystick:
+                    org.usfirst.frc.team449.robot.jacksonWrappers.MappedJoystick:
+                        driverGamepad
+                buttonNumber: 3
         command:
            org.usfirst.frc.team449.robot.subsystem.interfaces.intake.commands.ToggleIntake:
                 '@id': intakeIn
                 subsystem:
-                    - org.usfirst.frc.team449.robot.subsystem.interfaces.intake.IntakeSimple:
-                          intake
+                    org.usfirst.frc.team449.robot.subsystem.interfaces.intake.IntakeSimple:
+                        intake
                 mode: IN_FAST
     -   button:
-            org.usfirst.frc.team449.oi.buttons.SimpleButton
-            '@id': intakeOutButton
-            joystick:
-                 org.usfirst.frc.team449.robot.jacksonWrappers.MappedJoystick:
-                     driverGamepad
-            buttonNumber: 3
+            org.usfirst.frc.team449.oi.buttons.SimpleButton:
+                '@id': intakeOutButton
+                joystick:
+                    org.usfirst.frc.team449.robot.jacksonWrappers.MappedJoystick:
+                        driverGamepad
+                buttonNumber: 3
         command:
            org.usfirst.frc.team449.robot.subsystem.interfaces.intake.commands.ToggleIntake:
                 '@id': intakeOut
                 subsystem:
-                    - org.usfirst.frc.team449.robot.subsystem.interfaces.intake.IntakeSimple:
-                          intake
+                    org.usfirst.frc.team449.robot.subsystem.interfaces.intake.IntakeSimple:
+                        intake
                 mode: OUT_FAST
+    -   button:
+            org.usfirst.frc.team449.oi.buttons.SimpleButton:
+                '@id': intakePivotButton
+                joystick:
+                    org.usfirst.frc.team449.robot.jacksonWrappers.MappedJoystick:
+                       driverGamepad
+                buttonNumber: 4
+        command:
+           org.usfirst.frc.team449.robot.subsystem.interfaces.solenoid.commands.ToggleSolenoid:
+                '@id': togglePivot
+                subsystem:
+                    org.usfirst.frc.team449.robot.subsystem.interfaces.solenoid.SolenoidSimple:
+                        intakePivot
