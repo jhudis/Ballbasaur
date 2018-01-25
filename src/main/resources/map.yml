@@ -24,6 +24,13 @@ logger:
                 '@id': piston
                 forward: 2
                 reverse: 3
+        - org.usfirst.frc.team449.robot.subsystem.interfaces.solenoid.SolenoidSimple:
+            '@id': catapult
+            piston:
+              org.usfirst.frc.team449.robot.jacksonWrappers.MappedDoubleSolenoid:
+                '@id': piston2
+                forward: 4
+                reverse: 5
         - org.usfirst.frc.team449.robot.drive.unidirectional.DriveUnidirectionalWithGyroShiftable:
             '@id': drive
             #Wheelbase: 1.7083333333333333
@@ -221,10 +228,15 @@ logger:
                    intake
               mode: OFF
         - org.usfirst.frc.team449.robot.subsystem.interfaces.solenoid.commands.SolenoidOff:
-              '@id': solenoidOff
+              '@id': intakePivotOff
               subsystem:
                 org.usfirst.frc.team449.robot.subsystem.interfaces.solenoid.SolenoidSimple:
                    intakePivot
+        - org.usfirst.frc.team449.robot.subsystem.interfaces.solenoid.commands.SolenoidOff:
+              '@id': catapultOff
+              subsystem:
+                org.usfirst.frc.team449.robot.subsystem.interfaces.solenoid.SolenoidSimple:
+                   catapult
 defaultCommands:
     - subsystem:
         org.usfirst.frc.team449.robot.drive.unidirectional.DriveUnidirectionalWithGyroShiftable:
@@ -243,7 +255,13 @@ defaultCommands:
             intakePivot
       command:
         org.usfirst.frc.team449.robot.subsystem.interfaces.solenoid.commands.SolenoidOff:
-            solenoidOff
+            intakePivotOff
+    - subsystem:
+        org.usfirst.frc.team449.robot.subsystem.interfaces.solenoid.SolenoidSimple:
+            catapult
+      command:
+        org.usfirst.frc.team449.robot.subsystem.interfaces.solenoid.commands.SolenoidOff:
+            catapultOff
 startupCommand:
     org.usfirst.frc.team449.robot.commands.general.ParallelCommandGroup:
         '@id': startupCommand
@@ -271,6 +289,10 @@ updater:
                 navX
             - org.usfirst.frc.team449.robot.subsystem.interfaces.intake.IntakeSimple:
                 intake
+            - org.usfirst.frc.team449.robot.subsystem.interfaces.solenoid.SolenoidSimple:
+                intakePivot
+            - org.usfirst.frc.team449.robot.subsystem.interfaces.solenoid.SolenoidSimple:
+                catapult
 buttons:
     -   button:
             org.usfirst.frc.team449.robot.oi.buttons.SimpleButton:
@@ -330,14 +352,27 @@ buttons:
                 mode: OUT_FAST
     -   button:
             org.usfirst.frc.team449.oi.buttons.SimpleButton:
-                '@id': intakePivotButton
+                '@id': toggleIntakePivotButton
                 joystick:
                     org.usfirst.frc.team449.robot.jacksonWrappers.MappedJoystick:
                        driverGamepad
                 buttonNumber: 4
         command:
            org.usfirst.frc.team449.robot.subsystem.interfaces.solenoid.commands.ToggleSolenoid:
-                '@id': togglePivot
+                '@id': toggleIntakePivot
                 subsystem:
                     org.usfirst.frc.team449.robot.subsystem.interfaces.solenoid.SolenoidSimple:
                         intakePivot
+    -   button:
+            org.usfirst.frc.team449.oi.buttons.SimpleButton:
+                '@id': toggleCatapultButton
+                joystick:
+                    org.usfirst.frc.team449.robot.jacksonWrappers.MappedJoystick:
+                       driverGamepad
+                buttonNumber: 5
+        command:
+           org.usfirst.frc.team449.robot.subsystem.interfaces.solenoid.commands.ToggleSolenoid:
+                '@id': toggleCatapult
+                subsystem:
+                    org.usfirst.frc.team449.robot.subsystem.interfaces.solenoid.SolenoidSimple:
+                        catapult
